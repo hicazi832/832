@@ -1,0 +1,66 @@
+// item_wallpaper.xml <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:orientation="vertical"
+android:padding="8dp">
+
+<ImageView
+    android:id="@+id/imageView"
+    android:layout_width="150dp"
+    android:layout_height="150dp"
+    android:scaleType="centerCrop"/>
+
+<Button
+    android:id="@+id/downloadButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="تحميل"
+    android:layout_marginTop="4dp"/>
+
+</LinearLayout>// activity_main.xml <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<RecyclerView
+    android:id="@+id/recyclerView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"/>
+
+</RelativeLayout>// strings.xml <resources> <string name="app_name">تطبيق الخلفيات</string> </resources>
+
+// MainActivity.java package com.example.wallpaperapp;
+
+import android.app.WallpaperManager; import android.content.Context; import android.content.ContentValues; import android.content.ContentResolver; import android.graphics.Bitmap; import android.graphics.BitmapFactory; import android.graphics.drawable.Drawable; import android.net.Uri; import android.os.Bundle; import android.os.Environment; import android.provider.MediaStore; import android.widget.Button; import android.widget.ImageView; import android.widget.Toast; import androidx.annotation.NonNull; import androidx.appcompat.app.AppCompatActivity; import androidx.recyclerview.widget.GridLayoutManager; import androidx.recyclerview.widget.RecyclerView; import com.bumptech.glide.Glide; import com.bumptech.glide.request.target.CustomTarget; import com.bumptech.glide.request.transition.Transition; import java.io.File; import java.io.FileOutputStream; import java.io.IOException; import java.io.OutputStream; import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+    RecyclerView recyclerView = findViewById(R.id.recyclerView);
+    recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+}
+
+private void saveImage(Bitmap bitmap) {
+    File wallpaperDir = new File(Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES), "Wallpapers");
+    if (!wallpaperDir.exists()) {
+        if (!wallpaperDir.mkdirs()) {
+            Toast.makeText(this, "Failed to create directory", Toast.LENGTH_SHORT).show();
+            return;
+        }
+    }
+    String fileName = "wallpaper_" + System.currentTimeMillis() + ".jpg";
+    File imageFile = new File(wallpaperDir, fileName);
+    try (OutputStream fos = new FileOutputStream(imageFile)) {
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        MediaStore.Images.Media.insertImage(getContentResolver(), imageFile.getAbsolutePath(), fileName, null);
+        Toast.makeText(this, "تم تحميل الخلفية!", Toast.LENGTH_SHORT).show();
+    } catch (IOException e) {
+        Toast.makeText(this, "فشل تحميل الخلفية!", Toast.LENGTH_SHORT).show();
+    }
+}
+
+}
